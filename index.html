@@ -16,13 +16,14 @@
     <link rel="stylesheet" href="./assets/css/style.css" />
   </head>
   <body>
-    <header>
-      <p>Time: 30s</p>
-    </header>
+    <div class="timer-container">
+      <div class="timer-cap"></div>
+      <div class="timer-circle">
+        <p class="timer-text">30</p>
+      </div>
+    </div>
 
     <main>
-      <ul class="highscore-list">
-      </ul>
       <div class="text-container">
         <h1>Coding Quiz</h1>
         <p>
@@ -30,9 +31,11 @@
           knowledge by taking this timed quiz. When you answer a question
           incorrectly 10 seconds is subtracted from the clock.
         </p>
+        <button id='start-quiz-btn'>Start Quiz</button>
       </div>
     </main>
 
+    <script src="./assets/js/anime.min.js"></script>
     <script src="./assets/js/script.js"></script>
   </body>
 </html>
