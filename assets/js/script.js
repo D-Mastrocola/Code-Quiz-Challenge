@@ -66,6 +66,7 @@ let mainElement = document.querySelector("main");
 let score = 0;
 const MAX_SCORE = questions.length;
 let time = 30;
+let quizFinished;
 
 let endQuiz = () => {
   let endElements = document.createElement("div");
@@ -132,10 +133,6 @@ let checkAnswer = (event) => {
   });
 };
 let nextQuestion = () => {
-  if (questions.length === 0) {
-    endQuiz();
-    return false;
-  }
   let questionIndex = Math.floor(Math.random() * questions.length);
   currentQuestion = questions[questionIndex];
   let questionElements = document.createElement("div");
@@ -183,6 +180,7 @@ let nextQuestion = () => {
   mainElement.appendChild(questionElements);
 };
 let startQuiz = () => {
+  quizFinished = false;
   let landingElements = document.querySelector(".text-container");
 
   let loadingElements = document.createElement("div");
@@ -234,9 +232,47 @@ let startQuiz = () => {
           //Waits for animation to complete then removes elements from the DOM
           loadingElements.remove();
           nextQuestion();
+          window.requestAnimationFrame(quizLoop);
         }
       },
     });
 };
 
 startButton.addEventListener("click", startQuiz);
+
+let secondsPassed;
+let oldTimeStamp = 0;
+
+function quizLoop(timeStamp) {
+  // Calculate the number of seconds passed since the last frame
+  if ((secondsPassed = (timeStamp - oldTimeStamp) / 1000 >= 1)) {
+    oldTimeStamp = timeStamp;
+    time--;
+  }
+  //Changes HTML timer element
+  document.querySelector(".timer-text").textContent = time;
+
+  if (time <= 0) {
+    quizFinished = true;
+    time = 0;
+    let questionElements = document.querySelector(".question-container");
+    anime.timeline({}).add({
+      targets: questionElements,
+      opacity: 0,
+      duration: 500,
+      easing: "linear",
+      update: function (anim) {
+        if (anim.progress >= 100) {
+          //Waits for animation to complete then removes elements from the DOM
+          questionElements.remove();
+
+          endQuiz();
+          document.querySelector(".timer-text").textContent = time;
+        }
+      },
+    });
+  }
+
+  // The loop function has reached it's end. Keep requesting new frames
+  window.requestAnimationFrame(quizLoop);
+}
