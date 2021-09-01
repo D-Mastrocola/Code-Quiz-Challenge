@@ -228,7 +228,7 @@ let startQuiz = () => {
       opacity: 0,
       duration: 1000,
       update: function (anim) {
-        if (anim.progress >= 100) {
+        if (anim.progress === 100) {
           //Waits for animation to complete then removes elements from the DOM
           loadingElements.remove();
           nextQuestion();
@@ -244,35 +244,36 @@ let secondsPassed;
 let oldTimeStamp = 0;
 
 function quizLoop(timeStamp) {
-  // Calculate the number of seconds passed since the last frame
-  if ((secondsPassed = (timeStamp - oldTimeStamp) / 1000 >= 1)) {
-    oldTimeStamp = timeStamp;
-    time--;
+  if (!quizFinished) {
+    // Calculate the number of seconds passed since the last frame
+    if ((secondsPassed = (timeStamp - oldTimeStamp) / 1000 >= 1)) {
+      oldTimeStamp = timeStamp;
+      time--;
+    }
+    //Changes HTML timer element
+    document.querySelector(".timer-text").textContent = time;
+
+    if (time <= 0) {
+      quizFinished = true;
+      time = 0;
+      let questionElements = document.querySelector(".question-container");
+      anime.timeline({}).add({
+        targets: questionElements,
+        opacity: 0,
+        duration: 500,
+        easing: "linear",
+        update: function (anim) {
+          if (anim.progress === 100) {
+            //Waits for animation to complete then removes elements from the DOM
+            questionElements.remove();
+
+            endQuiz();
+            document.querySelector(".timer-text").textContent = time;
+          }
+        },
+      });
+    }
+    // The loop function has reached it's end. Keep requesting new frames
+    window.requestAnimationFrame(quizLoop);
   }
-  //Changes HTML timer element
-  document.querySelector(".timer-text").textContent = time;
-
-  if (time <= 0) {
-    quizFinished = true;
-    time = 0;
-    let questionElements = document.querySelector(".question-container");
-    anime.timeline({}).add({
-      targets: questionElements,
-      opacity: 0,
-      duration: 500,
-      easing: "linear",
-      update: function (anim) {
-        if (anim.progress >= 100) {
-          //Waits for animation to complete then removes elements from the DOM
-          questionElements.remove();
-
-          endQuiz();
-          document.querySelector(".timer-text").textContent = time;
-        }
-      },
-    });
-  }
-
-  // The loop function has reached it's end. Keep requesting new frames
-  window.requestAnimationFrame(quizLoop);
 }
