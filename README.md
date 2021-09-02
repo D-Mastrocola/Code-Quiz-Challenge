@@ -21,3 +21,7 @@ View the [Live Site](https://d-mastrocola.github.io/Code-Quiz-Challenge/)
 - THEN the game is over
 - WHEN the game is over
 - THEN I can save my initials and score
+
+## What I Learned
+- window and document are objects created by the browser that contain pre-built functions like window.alert() and document.addEventListener()
+- JSON is JavaScript Object Notation. It was made because it is easy for humans to read and can be easily parsed and generated
