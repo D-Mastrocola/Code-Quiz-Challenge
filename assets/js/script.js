@@ -281,7 +281,7 @@ let oldTimeStamp = 0;
 
 function quizLoop(timeStamp) {
   // Calculate the number of seconds passed since the last frame
-  if ((secondsPassed = (timeStamp - oldTimeStamp) / 1000 >= 1)) {
+  if ((secondsPassed = (timeStamp - oldTimeStamp) - 1000 >= 0)) {
     oldTimeStamp = timeStamp;
     time--;
     if (time < 0) time = 0;
