@@ -1,3 +1,10 @@
+let highscores = [];
+
+if (localStorage.getItem("highscores")) {
+  console.log("load succesful");
+  console.log(localStorage.getItem("highscores"));
+  highscores = JSON.parse(localStorage.getItem("highscores"));
+}
 let questions = [
   {
     question: "What does HTML stand for?",
@@ -49,10 +56,16 @@ let questions = [
     answer: "True",
   },
   {
-    question: "Which one of the following is not best practice when declaring a variable",
-    responses: ["let num = 2;", "var num = 2;", "const NUM = 2;", 'const num = 2;'],
-    answer: 'const num = 2;',
-  }
+    question:
+      "Which one of the following is not best practice when declaring a variable",
+    responses: [
+      "let num = 2;",
+      "var num = 2;",
+      "const NUM = 2;",
+      "const num = 2;",
+    ],
+    answer: "const num = 2;",
+  },
 ];
 
 let startButton = document.querySelector("#start-quiz-btn");
@@ -63,8 +76,36 @@ const MAX_SCORE = questions.length;
 let time = 30;
 let quizFinished;
 
+let addHighScore = (event) => {
+  let userInput = document.querySelector("#highscore-input");
+  event.preventDefault();
+
+  if(userInput.value === "" || userInput.value.includes(' ')) {
+      alert("Invalid Name. Please enter a name. You cannot leave blank and it cant contain any spaces.");
+      return;
+  }
+
+  event.target.remove();
+  let newScore = {
+    name: userInput.value,
+    score: score,
+  };
+  highscores.splice(
+    parseInt(userInput.getAttribute("highscore-index")),
+    0,
+    newScore
+  );
+  if (highscores.length > 10) highscores.pop();
+
+  localStorage.setItem("highscores", JSON.stringify(highscores));
+  printHighscores();
+  document.querySelector(".highscore-card").style.display = "flex";
+};
+
 let endQuiz = () => {
+  let isHighscore = false;
   quizFinished = true;
+  time = 0;
   let endElements = document.createElement("div");
   endElements.className = "end-container";
 
@@ -79,6 +120,67 @@ let endQuiz = () => {
   endElements.appendChild(endText);
 
   mainElement.appendChild(endElements);
+
+  // Check to see if current score is higher than any other higscore
+  for (let i = 0; i < highscores.length; i++) {
+    if (score > highscores[i].score) {
+      isHighscore = true;
+      let formElement = document.createElement("form");
+
+      let input = document.createElement("input");
+      input.name = "highscore";
+      input.id = "highscore-input";
+      input.setAttribute("highscore-index", i);
+      input.type = "text";
+      input.placeholder = "Enter Initials";
+      input.maxLength = 2;
+
+      formElement.appendChild(input);
+
+      let label = document.createElement("label");
+      label.for = "highscore-input";
+
+      formElement.appendChild(label);
+
+      let button = document.createElement("button");
+      button.textContent = "Enter";
+
+      formElement.appendChild(button);
+
+      endElements.appendChild(formElement);
+      formElement.addEventListener("submit", addHighScore);
+
+      break;
+    }
+  }
+  //If the player score isnt higher than any current highscore check to see if highscore list is full
+  if (!isHighscore && highscores.length < 10) {
+    isHighscore = true;
+    let formElement = document.createElement("form");
+
+    let input = document.createElement("input");
+    input.name = "highscore";
+    input.id = "highscore-input";
+    input.setAttribute("highscore-index", highscores.length);
+    input.type = "text";
+    input.placeholder = "Enter Initials";
+    input.maxLength = 2;
+
+    formElement.appendChild(input);
+
+    let label = document.createElement("label");
+    label.for = "highscore-input";
+
+    formElement.appendChild(label);
+
+    let button = document.createElement("button");
+    button.textContent = "Enter";
+
+    formElement.appendChild(button);
+
+    endElements.appendChild(formElement);
+    formElement.addEventListener("submit", addHighScore);
+  }
 };
 
 let correct = () => {
@@ -90,7 +192,7 @@ let incorrect = () => (time -= 10);
 let currentQuestion;
 
 let checkAnswer = (event) => {
-  let isRight = false;
+  let checkedButton;
   event.preventDefault();
 
   let radioButtonElements = document.querySelectorAll(
@@ -99,16 +201,16 @@ let checkAnswer = (event) => {
   console.log(radioButtonElements);
   for (let i = 0; i < radioButtonElements.length; i++) {
     if (radioButtonElements[i].checked) {
-      if (
-        document.querySelector("#response-label-" + i).textContent ===
-        currentQuestion.answer
-      ) {
-        isRight = true;
-        break;
-      }
+      checkedButton = document.querySelector(
+        "#response-label-" + i
+      ).textContent;
     }
   }
-  if (isRight) correct();
+  if (!checkedButton) {
+    window.alert("Please select an answer");
+    return;
+  }
+  if (checkedButton === currentQuestion.answer) correct();
   else incorrect();
 
   let questionElements = document.querySelector(".question-container");
@@ -174,8 +276,6 @@ let startQuiz = () => {
   window.requestAnimationFrame(quizLoop);
 };
 
-startButton.addEventListener("click", startQuiz);
-
 let secondsPassed;
 let oldTimeStamp = 0;
 
@@ -200,17 +300,50 @@ function quizLoop(timeStamp) {
   let timerCap = document.querySelector(".timer-cap");
   if (time <= 5) {
     timerCap.style.background = "rgb(255, 0, 0)";
-    timerCircle.style.border = "solid 10px rgb(255, 0, 0)";
+    timerCircle.style.borderColor = "rgb(255, 0, 0)";
   } else if (time <= 10) {
     timerCap.style.background = "rgb(255, 150, 0)";
-    timerCircle.style.border = "solid 10px rgb(255, 150, 0)";
-  }else if (time <= 20) {
+    timerCircle.style.borderColor = "rgb(255, 150, 0)";
+  } else if (time <= 20) {
     timerCap.style.background = "rgb(255, 200, 0)";
-    timerCircle.style.border = "solid 10px rgb(255, 200, 0)";
+    timerCircle.style.borderColor = "rgb(255, 200, 0)";
   } else {
     timerCap.style.background = "rgb(0, 255, 0)";
-    timerCircle.style.border = "solid 10px rgb(0, 255, 0)";
+    timerCircle.style.borderColor = "rgb(0, 255, 0)";
   }
   // The loop function has reached it's end. Keep requesting new frames
   window.requestAnimationFrame(quizLoop);
 }
+
+let printHighscores = () => {
+  let higscoreListEl = document.querySelector(".highscore-card ol");
+  higscoreListEl.innerHTML = "";
+
+  if (highscores.length === 0) higscoreListEl.innerHTML = "none";
+  for (let i = 0; i < highscores.length; i++) {
+    let listEl = document.createElement("li");
+    listEl.className = "highscore-item";
+
+    listEl.innerHTML =
+      "<span>" + highscores[i].name + "</span> " + highscores[i].score;
+
+    higscoreListEl.appendChild(listEl);
+  }
+};
+printHighscores();
+
+document
+  .querySelector("#highscore-btn")
+  .addEventListener(
+    "click",
+    () => (document.querySelector(".highscore-card").style.display = "flex")
+  );
+
+document
+  .querySelector("#exit-highscore")
+  .addEventListener(
+    "click",
+    () => (document.querySelector(".highscore-card").style.display = "none")
+  );
+
+startButton.addEventListener("click", startQuiz);

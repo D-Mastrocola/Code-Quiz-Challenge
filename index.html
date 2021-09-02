@@ -13,14 +13,26 @@
       content="A coding quiz for HTML, CSS, and JavaScript"
     />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Open+Sans&family=PT+Sans&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="./assets/css/style.css" />
   </head>
   <body>
+    <button id='highscore-btn'>Highscores</button>
     <div class="timer-container">
       <div class="timer-cap"></div>
       <div class="timer-circle">
         <p class="timer-text">30</p>
       </div>
+    </div>
+    <div class='highscore-card'>
+      <div id='exit-highscore'>X</div>
+      <h3>Highscores</h3>
+      <ol></ol>
     </div>
 
     <main>
@@ -31,7 +43,7 @@
           knowledge by taking this timed quiz. When you answer a question
           incorrectly 10 seconds is subtracted from the clock.
         </p>
-        <button id='start-quiz-btn'>Start Quiz</button>
+        <button id="start-quiz-btn">Start Quiz</button>
       </div>
     </main>
 
