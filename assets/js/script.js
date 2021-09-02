@@ -49,15 +49,10 @@ let questions = [
     answer: "True",
   },
   {
-    question:
-      "Which line of code will change (var myVar = 'Hello World';) so that console.log(myVar) will return 'HELLO WORLD'",
-    responses: [
-      "myVar.toUpperCase();",
-      "var myVarUpperCase = myVar.toUpperCase();",
-      "var myVar = 'hello world'",
-    ],
-    answer: "var myVarUpperCase = myVar.toUpperCase();",
-  },
+    question: "Which one of the following is not best practice when declaring a variable",
+    responses: ["let num = 2;", "var num = 2;", "const NUM = 2;", 'const num = 2;'],
+    answer: 'const num = 2;',
+  }
 ];
 
 let startButton = document.querySelector("#start-quiz-btn");
@@ -69,6 +64,7 @@ let time = 30;
 let quizFinished;
 
 let endQuiz = () => {
+  quizFinished = true;
   let endElements = document.createElement("div");
   endElements.className = "end-container";
 
@@ -117,20 +113,9 @@ let checkAnswer = (event) => {
 
   let questionElements = document.querySelector(".question-container");
 
-  anime.timeline({}).add({
-    targets: questionElements,
-    opacity: 0,
-    duration: 500,
-    easing: "linear",
-    update: function (anim) {
-      if (anim.progress >= 100) {
-        //Waits for animation to complete then removes elements from the DOM
-        questionElements.remove();
-        if (questions.length > 0) nextQuestion();
-        else endQuiz();
-      }
-    },
-  });
+  questionElements.remove();
+  if (questions.length > 0 && time > 0) nextQuestion();
+  else endQuiz();
 };
 let nextQuestion = () => {
   let questionIndex = Math.floor(Math.random() * questions.length);
@@ -183,59 +168,10 @@ let startQuiz = () => {
   quizFinished = false;
   let landingElements = document.querySelector(".text-container");
 
-  let loadingElements = document.createElement("div");
-  loadingElements.className = "loading-container";
+  landingElements.remove();
 
-  let loadingText = document.createElement("p");
-  loadingText.textContent = "Loading: 0%";
-
-  let loadingBar = document.createElement("div");
-  loadingBar.className = "loading-bar";
-
-  loadingElements.appendChild(loadingText);
-  loadingElements.appendChild(loadingBar);
-
-  anime
-    .timeline({})
-    .add({
-      targets: landingElements,
-      opacity: 0,
-      duration: 1000,
-      update: function (anim) {
-        if (anim.progress == 100) {
-          //Waits for animation to complete then removes elements from the DOM
-          landingElements.remove();
-          mainElement.appendChild(loadingElements);
-        }
-      },
-    })
-    .add({
-      targets: loadingElements,
-      opacity: 1,
-      duration: 1000,
-    })
-    .add({
-      targets: loadingBar,
-      width: "100%",
-      duration: 2000,
-      easing: "easeOutExpo",
-      update: function (anim) {
-        loadingText.textContent = "Loading: " + Math.round(anim.progress) + "%";
-      },
-    })
-    .add({
-      targets: loadingElements,
-      opacity: 0,
-      duration: 1000,
-      update: function (anim) {
-        if (anim.progress === 100) {
-          //Waits for animation to complete then removes elements from the DOM
-          loadingElements.remove();
-          nextQuestion();
-          window.requestAnimationFrame(quizLoop);
-        }
-      },
-    });
+  nextQuestion();
+  window.requestAnimationFrame(quizLoop);
 };
 
 startButton.addEventListener("click", startQuiz);
@@ -244,36 +180,37 @@ let secondsPassed;
 let oldTimeStamp = 0;
 
 function quizLoop(timeStamp) {
-  if (!quizFinished) {
-    // Calculate the number of seconds passed since the last frame
-    if ((secondsPassed = (timeStamp - oldTimeStamp) / 1000 >= 1)) {
-      oldTimeStamp = timeStamp;
-      time--;
-    }
-    //Changes HTML timer element
-    document.querySelector(".timer-text").textContent = time;
-
-    if (time <= 0) {
-      quizFinished = true;
-      time = 0;
-      let questionElements = document.querySelector(".question-container");
-      anime.timeline({}).add({
-        targets: questionElements,
-        opacity: 0,
-        duration: 500,
-        easing: "linear",
-        update: function (anim) {
-          if (anim.progress === 100) {
-            //Waits for animation to complete then removes elements from the DOM
-            questionElements.remove();
-
-            endQuiz();
-            document.querySelector(".timer-text").textContent = time;
-          }
-        },
-      });
-    }
-    // The loop function has reached it's end. Keep requesting new frames
-    window.requestAnimationFrame(quizLoop);
+  // Calculate the number of seconds passed since the last frame
+  if ((secondsPassed = (timeStamp - oldTimeStamp) / 1000 >= 1)) {
+    oldTimeStamp = timeStamp;
+    time--;
+    if (time < 0) time = 0;
   }
+  if (time <= 0 && !quizFinished) {
+    quizFinished = true;
+    time = 0;
+    let questionElements = document.querySelector(".question-container");
+    questionElements.remove();
+
+    endQuiz();
+  }
+  document.querySelector(".timer-text").textContent = time;
+
+  let timerCircle = document.querySelector(".timer-circle");
+  let timerCap = document.querySelector(".timer-cap");
+  if (time <= 5) {
+    timerCap.style.background = "rgb(255, 0, 0)";
+    timerCircle.style.border = "solid 10px rgb(255, 0, 0)";
+  } else if (time <= 10) {
+    timerCap.style.background = "rgb(255, 150, 0)";
+    timerCircle.style.border = "solid 10px rgb(255, 150, 0)";
+  }else if (time <= 20) {
+    timerCap.style.background = "rgb(255, 200, 0)";
+    timerCircle.style.border = "solid 10px rgb(255, 200, 0)";
+  } else {
+    timerCap.style.background = "rgb(0, 255, 0)";
+    timerCircle.style.border = "solid 10px rgb(0, 255, 0)";
+  }
+  // The loop function has reached it's end. Keep requesting new frames
+  window.requestAnimationFrame(quizLoop);
 }
